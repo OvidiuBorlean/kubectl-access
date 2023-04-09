@@ -1,0 +1,36 @@
+# k create cm kubeconfig --from-file=/home/ovidiu/.kube/config
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: kubeaccess
+  name: kubeaccess
+spec:
+  containers:
+  - image: nginx
+    name: kubeaccess
+    #command: ["/bin/bash"]
+    #args: ['-c','echo First &&  echo Second && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /tmp/kubectl && chmod +x /tmp/kubectl && export KUBECONFIG='/app/config' && /tmp/kubectl get nodes && sleep 3600']
+    command:
+      - bash
+      - -c
+      - | 
+        echo "Install kubectl binary"
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        echo "Make binary executable"
+        chmod +x /kubectl
+        export KUBECONFIG="/app/config"
+        /kubectl get nodes
+        sleep 3600
+    volumeMounts:
+    - name: kubeaccess-volume
+      mountPath: "/app"
+      readOnly: true
+  volumes:
+  - name: kubeaccess-volume
+    configMap:
+      name: kubeconfig
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
